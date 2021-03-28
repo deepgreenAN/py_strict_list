@@ -613,64 +613,6 @@ b
 
 
 ```python
-class LengthStrictList(StructureStrictList):
-    def _get_structure(self):
-        """
-        構造を取得するためのメソッド．基本的に自身が変更されたときに呼ぶ
-        """
-        self._length_structure = self._get_length_structure(self)
-       
-    def check_same_structure_with(self, list_like, include_outer_length=True):
-        """
-        list_like: list like object
-            構造を自身と比較したいリスト
-        include_outer_length int
-            最も外側の長さを比較する構造に含めるかどうか．
-        """
-        try:
-            list_like_length_structure = self._get_length_structure(list_like)
-        except:  #構造の取得に失敗した場合
-            return False
-        if include_outer_length: # 一番外側の比較も行う
-            is_same_length_structure = self._check_same_length_structure(self._length_structure,
-                                                                         list_like_length_structure
-                                                                        ) 
-
-        else:  # 一番外側の比較は行わない
-            is_same_length_structure = self._check_same_length_structure(self._length_structure[list(self._length_structure.keys())[0]],
-                                                                         list_like_length_structure[list(list_like_length_structure.keys())[0]]
-                                                                        )
-
-        return is_same_length_structure
-    
-    def check_item_structure(self, item):
-        """
-        item: any
-            構造を自身の要素と比較したい要素候補
-        """
-        try:
-            item_length_structure = self._get_length_structure(item)
-        except:  #構造の取得に失敗した場合
-            return False
-        # itemがリストの場合
-        if isinstance(item, list):
-            is_same_length_structure = self._check_same_length_structure(self._length_structure[list(self._length_structure.keys())[0]],
-                                                                         item_length_structure)
-        else:
-            is_same_length_structure = True
-        
-        return is_same_length_structure
-    
-    @classmethod
-    def from_length_structure(cls, _length_structure):
-        instance = cls(None)
-        super(StructureStrictList, instance).remove(None)  # 親のスーパークラスのメソッド呼び出し
-        instance._length_structure = _length_structure
-        return instance
-```
-
-
-```python
 a = LengthStrictList([1,2,3],[1,2])
 ```
 
