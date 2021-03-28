@@ -354,61 +354,6 @@ def some_list(self, __some_list):
 
 
 ```python
-class TypeStrictList(StructureStrictList):
-    def _get_structure(self):
-        """
-        構造を取得するためのメソッド．基本的に自身が変更されたときに呼ぶ
-        """
-        self._type_structure = self._get_type_structure(self)
-    
-    def check_same_structure_with(self, list_like, include_outer_length=True):
-        """
-        list_like: list like object
-            構造を自身と比較したいリスト
-        include_outer_length int
-            最も外側の長さを比較する構造に含めるかどうか．今回は意味ない
-        """
-        try:
-            list_like_type_structure = self._get_type_structure(list_like)
-        except:  #構造の取得に失敗した場合
-            return False
-        is_same_type_structure = self._check_same_type_structure(self._type_structure, list_like_type_structure)
-        return is_same_type_structure
-    
-    def check_item_structure(self, item):
-        """
-        item: any
-            構造を自身の要素と比較したい要素候補
-        """
-        try:
-            item_type_structure = self._get_type_structure(item)
-        except:  #構造の取得に失敗した場合
-            return False
-        
-        # itemがリストの場合
-        if isinstance(item, list):
-            is_same_type_structure = self._check_same_type_structure(self._type_structure[0], item_type_structure)
-        else:
-            if not isinstance(self._type_structure[0], list):
-                is_same_type_structure = isinstance(item,self._type_structure[0])
-            else:
-                is_same_type_structure = False
-        
-        return is_same_type_structure
-    
-    @classmethod
-    def from_type_structure(cls, _type_structure):
-        """
-        型構造構造から，空のStructureStrictListを作成
-        """
-        instance = cls(None)
-        super(StructureStrictList, instance).remove(None)  # 親のスーパークラスのメソッド呼び出し
-        instance._type_structure = _type_structure
-        return instance
-```
-
-
-```python
 a = TypeStrictList(["a","b"],[1,2])
 ```
 
