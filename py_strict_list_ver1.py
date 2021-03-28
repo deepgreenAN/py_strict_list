@@ -103,7 +103,7 @@ class StructureStrictList(list):
                 return False  # 構造が異なるため
         return same_structure_dicision(structure1, structure2)
     
-    def check_same_structure_with(self, list_like, include_outer_length=True):
+    def check_same_structure_with(self, list_like, include_outer_length=False):
         is_same_type_structure = self._check_same_type_structure(self._type_structure, self._get_type_structure(list_like))
         list_like_length_structure = self._get_length_structure(list_like)
         if include_outer_length: # 一番外側の比較も行う
