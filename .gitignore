@@ -9,3 +9,5 @@ Untitled.ipynb
 
 # その他
 .vscode/
+build/
+dist/

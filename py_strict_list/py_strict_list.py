@@ -344,5 +344,23 @@ def tsl(*args):
 def lsl(*args):
     return LengthStrictList(*args)
 
+def ssl_from_list(_list):
+    return StructureStrictList.from_list(_list)
+
+def tsl_from_list(_list):
+    return TypeStrictList.from_list(_list)
+
+def lsl_from_list(_list):
+    return LengthStrictList.from_list(_list)
+
+def ssl_from_structures(type_structure, length_structure):
+    return StructureStrictList.from_structures(type_structure, length_structure)
+
+def tsl_from_structure(type_structure):
+    return TypeStrictList.from_type_structure(type_structure)
+
+def lsl_from_structure(length_structure):
+    return LengthStrictList.from_length_structure(length_structure)
+
 if __name__ == "__main__":
     pass
