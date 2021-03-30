@@ -4,7 +4,10 @@
 あくまでも型チェック用のリストであり，速度の向上は無い．
 
 ## 使い方
-ワーキングディレクトリにクローンするかパスを通せば使える． 
+クローンした後，そのディレクトリで以下を実行する．
+```
+python setup.py install
+```
 
 ```python
 from py_strict_list import StructureStrictList, TypeStrictList, LengthStrictList
