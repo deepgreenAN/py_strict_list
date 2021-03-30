@@ -8,7 +8,7 @@ packages = [
 ]
 
 setup(
-    name='py-strict-list',
+    name='py_strict_list',
     version='0.0.0',
     packages=packages,
     install_requires=install_requires,
