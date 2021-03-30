@@ -4,6 +4,11 @@
 あくまでも型チェック用のリストであり，速度の向上は無い．
 
 ## 使い方
+以下を実行する
+```
+pip install git+https://github.com/deepgreenAN/py_strict_list
+```
+あるいは
 クローンした後，そのディレクトリで以下を実行する．
 ```
 python setup.py install

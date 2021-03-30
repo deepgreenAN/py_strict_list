@@ -11,3 +11,4 @@ Untitled.ipynb
 .vscode/
 build/
 dist/
+py_strict_list.egg-info/
