@@ -3,8 +3,12 @@
 プロパティとしてリストを採用する際などで，変更時に型チェックできる．セッターなどで利用するときも簡単に型チェックできるようにした．基本的に構造はコンストラクタで確定される．(構造から空リストを作ることもできる．)
 あくまでも型チェック用のリストであり，速度の向上は無い．
 
-## 使い方
-以下を実行する
+## test
+```
+python setup.py test
+```
+
+## installation
 ```
 pip install git+https://github.com/deepgreenAN/py_strict_list
 ```
@@ -14,6 +18,7 @@ pip install git+https://github.com/deepgreenAN/py_strict_list
 python setup.py install
 ```
 
+## 使い方
 ```python
 from py_strict_list import StructureStrictList, TypeStrictList, LengthStrictList
 ```
@@ -28,37 +33,37 @@ a = StructureStrictList([1,2],["a", "b"])
 
     ---------------------------------------------------------------------------
 
-    Exception                                 Traceback (most recent call last)
+    StructureInvalidError                     Traceback (most recent call last)
 
-    <ipython-input-34-905093049281> in <module>
+    <ipython-input-3-905093049281> in <module>
     ----> 1 a = StructureStrictList([1,2],["a", "b"])
     
 
-    E:\py_strict_list\py_strict_list_ver1.py in __init__(self, *args)
-          8         """
-          9         super(StructureStrictList, self).__init__(args)
-    ---> 10         self._get_structure()  # 構造を取得
-         11 
-         12     def _get_structure(self):
-    
-
-    E:\py_strict_list\py_strict_list_ver1.py in _get_structure(self)
-         14         構造を取得するためのメソッド．基本的に自身が変更されたときに呼ぶ
+    E:\py_strict_list\py_strict_list\py_strict_list.py in __init__(self, *args)
          15         """
-    ---> 16         self._type_structure = self._get_type_structure(self)
-         17         self._length_structure = self._get_length_structure(self)
+         16         super(StructureStrictList, self).__init__(args)
+    ---> 17         self._get_structure()  # 構造を取得
          18 
+         19     def _get_structure(self):
     
 
-    E:\py_strict_list\py_strict_list_ver1.py in _get_type_structure(list_like)
-         35             raise Exception("list like object is enmty")
-         36         if len(set(type_list)) > 1:  # リストの型の種類が一つ以上の場合
-    ---> 37             raise Exception("list like object have to have same type items")
-         38 
-         39         # それぞれの型が全て等しいかチェック
+    E:\py_strict_list\py_strict_list\py_strict_list.py in _get_structure(self)
+         21         構造を取得するためのメソッド．基本的に自身が変更されたときに呼ぶ
+         22         """
+    ---> 23         self._type_structure = self._get_type_structure(self)
+         24         self._length_structure = self._get_length_structure(self)
+         25 
     
 
-    Exception: list like object have to have same type items
+    E:\py_strict_list\py_strict_list\py_strict_list.py in _get_type_structure(list_like)
+         49                 raise StructureInvalidError("list like object is enmty")
+         50             if len(set(all_type_list)) > 1:  # リスト以外の型の種類が一つ以上の場合
+    ---> 51                 raise StructureInvalidError("list like object have to have same type items")
+         52 
+         53         def type_dicision(item):
+    
+
+    StructureInvalidError: list like object have to have same type items
 
 
 
@@ -69,45 +74,45 @@ a = StructureStrictList([1,2],[3])
 
     ---------------------------------------------------------------------------
 
-    Exception                                 Traceback (most recent call last)
+    StructureInvalidError                     Traceback (most recent call last)
 
-    <ipython-input-35-337e9e91693a> in <module>
+    <ipython-input-4-337e9e91693a> in <module>
     ----> 1 a = StructureStrictList([1,2],[3])
     
 
-    E:\py_strict_list\py_strict_list_ver1.py in __init__(self, *args)
-          8         """
-          9         super(StructureStrictList, self).__init__(args)
-    ---> 10         self._get_structure()  # 構造を取得
-         11 
-         12     def _get_structure(self):
-    
-
-    E:\py_strict_list\py_strict_list_ver1.py in _get_structure(self)
+    E:\py_strict_list\py_strict_list\py_strict_list.py in __init__(self, *args)
          15         """
-         16         self._type_structure = self._get_type_structure(self)
-    ---> 17         self._length_structure = self._get_length_structure(self)
+         16         super(StructureStrictList, self).__init__(args)
+    ---> 17         self._get_structure()  # 構造を取得
          18 
-         19     @staticmethod
+         19     def _get_structure(self):
     
 
-    E:\py_strict_list\py_strict_list_ver1.py in _get_length_structure(list_like)
-         73                     raise Exception("list like object have to have same length recursive")
-         74 
-    ---> 75         item_have_same_length(list_like)  # 長さが違う場合エラーがでる．
-         76 
-         77         def length_dicision(item, structure_dict):
+    E:\py_strict_list\py_strict_list\py_strict_list.py in _get_structure(self)
+         22         """
+         23         self._type_structure = self._get_type_structure(self)
+    ---> 24         self._length_structure = self._get_length_structure(self)
+         25 
+         26     @staticmethod
     
 
-    E:\py_strict_list\py_strict_list_ver1.py in item_have_same_length(item)
-         71                         item_have_same_length(item_child)
-         72                 if len(length_list)!=0 and len(set(length_list))!=1:
-    ---> 73                     raise Exception("list like object have to have same length recursive")
-         74 
-         75         item_have_same_length(list_like)  # 長さが違う場合エラーがでる．
+    E:\py_strict_list\py_strict_list\py_strict_list.py in _get_length_structure(list_like)
+         80 
+         81         if isinstance(list_like, list):
+    ---> 82             item_have_same_length(list_like)  # 長さが違う場合エラーがでる．
+         83 
+         84         def length_dicision(item, structure_dict):
     
 
-    Exception: list like object have to have same length recursive
+    E:\py_strict_list\py_strict_list\py_strict_list.py in item_have_same_length(item)
+         75                     is_list_list.append(False)
+         76             if len(length_list)!=0 and len(set(length_list))!=1:
+    ---> 77                 raise StructureInvalidError("list like object have to have same length recursively")
+         78             if not (all(is_list_list) or not any(is_list_list)):  #（すべてリストかすべてリストでないとき）以外
+         79                 raise StructureInvalidError("list like object has save dimension as tree")
+    
+
+    StructureInvalidError: list like object have to have same length recursively
 
 
 
@@ -207,21 +212,21 @@ a.append(1)
 
     ---------------------------------------------------------------------------
 
-    Exception                                 Traceback (most recent call last)
+    StructureInvalidError                     Traceback (most recent call last)
 
-    <ipython-input-43-da0a5ad497c3> in <module>
+    <ipython-input-12-da0a5ad497c3> in <module>
     ----> 1 a.append(1)
     
 
-    E:\py_strict_list\py_strict_list_ver1.py in append(self, item)
-        202     def append(self, item):
-        203         if not self.check_item_structure(item):
-    --> 204             raise Exception("this item is restricted for append")
-        205         super(StructureStrictList, self).append(item)
-        206         self._get_structure()
+    E:\py_strict_list\py_strict_list\py_strict_list.py in append(self, item)
+        171     def append(self, item):
+        172         if not self.check_item_structure(item):
+    --> 173             raise StructureInvalidError("This item is restricted for append")
+        174         return_value = super(StructureStrictList, self).append(item)
+        175         self._get_structure()
     
 
-    Exception: this item is restricted for append
+    StructureInvalidError: This item is restricted for append
 
 
 
@@ -251,6 +256,8 @@ a
     [[1, 2], [3, 4], [5, 6], [7, 8], [9, 10], [11, 12]]
 
 
+
+もちろん，その他のリストのメソッドも利用できる．
 
 ### from_list 
 
@@ -314,21 +321,21 @@ e.append(1)
 
     ---------------------------------------------------------------------------
 
-    Exception                                 Traceback (most recent call last)
+    StructureInvalidError                     Traceback (most recent call last)
 
-    <ipython-input-50-0292b4a997ee> in <module>
+    <ipython-input-19-0292b4a997ee> in <module>
     ----> 1 e.append(1)
     
 
-    E:\py_strict_list\py_strict_list_ver1.py in append(self, item)
-        202     def append(self, item):
-        203         if not self.check_item_structure(item):
-    --> 204             raise Exception("this item is restricted for append")
-        205         super(StructureStrictList, self).append(item)
-        206         self._get_structure()
+    E:\py_strict_list\py_strict_list\py_strict_list.py in append(self, item)
+        171     def append(self, item):
+        172         if not self.check_item_structure(item):
+    --> 173             raise StructureInvalidError("This item is restricted for append")
+        174         return_value = super(StructureStrictList, self).append(item)
+        175         self._get_structure()
     
 
-    Exception: this item is restricted for append
+    StructureInvalidError: This item is restricted for append
 
 
 
@@ -368,37 +375,37 @@ a = TypeStrictList(["a","b"],[1,2])
 
     ---------------------------------------------------------------------------
 
-    Exception                                 Traceback (most recent call last)
+    StructureInvalidError                     Traceback (most recent call last)
 
-    <ipython-input-53-e265aa80b45c> in <module>
+    <ipython-input-21-e265aa80b45c> in <module>
     ----> 1 a = TypeStrictList(["a","b"],[1,2])
     
 
-    E:\py_strict_list\py_strict_list_ver1.py in __init__(self, *args)
-          8         """
-          9         super(StructureStrictList, self).__init__(args)
-    ---> 10         self._get_structure()  # 構造を取得
-         11 
-         12     def _get_structure(self):
+    E:\py_strict_list\py_strict_list\py_strict_list.py in __init__(self, *args)
+         15         """
+         16         super(StructureStrictList, self).__init__(args)
+    ---> 17         self._get_structure()  # 構造を取得
+         18 
+         19     def _get_structure(self):
     
 
-    <ipython-input-52-e53e34044fd4> in _get_structure(self)
-          4         構造を取得するためのメソッド．基本的に自身が変更されたときに呼ぶ
-          5         """
-    ----> 6         self._type_structure = self._get_type_structure(self)
-          7 
-          8     def check_same_structure_with(self, list_like, include_outer_length=True):
+    E:\py_strict_list\py_strict_list\py_strict_list.py in _get_structure(self)
+        204         構造を取得するためのメソッド．基本的に自身が変更されたときに呼ぶ
+        205         """
+    --> 206         self._type_structure = self._get_type_structure(self)
+        207 
+        208     def check_same_structure_with(self, list_like, include_outer_length=False):
     
 
-    E:\py_strict_list\py_strict_list_ver1.py in _get_type_structure(list_like)
-         35             raise Exception("list like object is enmty")
-         36         if len(set(type_list)) > 1:  # リストの型の種類が一つ以上の場合
-    ---> 37             raise Exception("list like object have to have same type items")
-         38 
-         39         # それぞれの型が全て等しいかチェック
+    E:\py_strict_list\py_strict_list\py_strict_list.py in _get_type_structure(list_like)
+         49                 raise StructureInvalidError("list like object is enmty")
+         50             if len(set(all_type_list)) > 1:  # リスト以外の型の種類が一つ以上の場合
+    ---> 51                 raise StructureInvalidError("list like object have to have same type items")
+         52 
+         53         def type_dicision(item):
     
 
-    Exception: list like object have to have same type items
+    StructureInvalidError: list like object have to have same type items
 
 
 
@@ -409,45 +416,45 @@ a = TypeStrictList(["a","b"],"c")
 
     ---------------------------------------------------------------------------
 
-    Exception                                 Traceback (most recent call last)
+    StructureInvalidError                     Traceback (most recent call last)
 
-    <ipython-input-54-2ef8de3b788c> in <module>
+    <ipython-input-22-2ef8de3b788c> in <module>
     ----> 1 a = TypeStrictList(["a","b"],"c")
     
 
-    E:\py_strict_list\py_strict_list_ver1.py in __init__(self, *args)
-          8         """
-          9         super(StructureStrictList, self).__init__(args)
-    ---> 10         self._get_structure()  # 構造を取得
-         11 
-         12     def _get_structure(self):
+    E:\py_strict_list\py_strict_list\py_strict_list.py in __init__(self, *args)
+         15         """
+         16         super(StructureStrictList, self).__init__(args)
+    ---> 17         self._get_structure()  # 構造を取得
+         18 
+         19     def _get_structure(self):
     
 
-    <ipython-input-52-e53e34044fd4> in _get_structure(self)
-          4         構造を取得するためのメソッド．基本的に自身が変更されたときに呼ぶ
-          5         """
-    ----> 6         self._type_structure = self._get_type_structure(self)
-          7 
-          8     def check_same_structure_with(self, list_like, include_outer_length=True):
+    E:\py_strict_list\py_strict_list\py_strict_list.py in _get_structure(self)
+        204         構造を取得するためのメソッド．基本的に自身が変更されたときに呼ぶ
+        205         """
+    --> 206         self._type_structure = self._get_type_structure(self)
+        207 
+        208     def check_same_structure_with(self, list_like, include_outer_length=False):
     
 
-    E:\py_strict_list\py_strict_list_ver1.py in _get_type_structure(list_like)
-         48                     raise Exception("list like object have to have same type recursive")
-         49 
-    ---> 50         item_have_same_type(list_like)  # 長さが違う場合エラーがでる．
-         51 
-         52         def type_dicision(item):
+    E:\py_strict_list\py_strict_list\py_strict_list.py in _get_type_structure(list_like)
+         44 
+         45         if isinstance(list_like, list):  # リストでないと以下の処理が意味ないため
+    ---> 46             item_have_same_type(list_like)  # リスト内のそれぞれの型が違う場合エラーがでる．
+         47 
+         48             if len(set(all_type_list)) == 0:  # リスト以外の型が存在しない場合
     
 
-    E:\py_strict_list\py_strict_list_ver1.py in item_have_same_type(item)
-         46                         item_have_same_type(item_child)
-         47                 if len(type_list)!=0 and len(set(type_list))!=1:
-    ---> 48                     raise Exception("list like object have to have same type recursive")
-         49 
-         50         item_have_same_type(list_like)  # 長さが違う場合エラーがでる．
+    E:\py_strict_list\py_strict_list\py_strict_list.py in item_have_same_type(item)
+         41                    all_type_list.append(type(item_child))
+         42             if len(type_list)!=0 and len(set(type_list))!=1:
+    ---> 43                 raise StructureInvalidError("list like object have to have same type recursively")
+         44 
+         45         if isinstance(list_like, list):  # リストでないと以下の処理が意味ないため
     
 
-    Exception: list like object have to have same type recursive
+    StructureInvalidError: list like object have to have same type recursively
 
 
 
@@ -477,21 +484,21 @@ a.append("a")
 
     ---------------------------------------------------------------------------
 
-    Exception                                 Traceback (most recent call last)
+    StructureInvalidError                     Traceback (most recent call last)
 
-    <ipython-input-57-be817fbe9230> in <module>
+    <ipython-input-25-be817fbe9230> in <module>
     ----> 1 a.append("a")
     
 
-    E:\py_strict_list\py_strict_list_ver1.py in append(self, item)
-        202     def append(self, item):
-        203         if not self.check_item_structure(item):
-    --> 204             raise Exception("this item is restricted for append")
-        205         super(StructureStrictList, self).append(item)
-        206         self._get_structure()
+    E:\py_strict_list\py_strict_list\py_strict_list.py in append(self, item)
+        171     def append(self, item):
+        172         if not self.check_item_structure(item):
+    --> 173             raise StructureInvalidError("This item is restricted for append")
+        174         return_value = super(StructureStrictList, self).append(item)
+        175         self._get_structure()
     
 
-    Exception: this item is restricted for append
+    StructureInvalidError: This item is restricted for append
 
 
 
@@ -506,6 +513,8 @@ a
     [['a', 'b'], ['c', 'd'], ['e']]
 
 
+
+### 構造から空のTSLを作成する
 
 
 ```python
@@ -532,21 +541,21 @@ b.append(["c"])
 
     ---------------------------------------------------------------------------
 
-    Exception                                 Traceback (most recent call last)
+    StructureInvalidError                     Traceback (most recent call last)
 
-    <ipython-input-61-ea8bf38fa590> in <module>
+    <ipython-input-29-ea8bf38fa590> in <module>
     ----> 1 b.append(["c"])
     
 
-    E:\py_strict_list\py_strict_list_ver1.py in append(self, item)
-        202     def append(self, item):
-        203         if not self.check_item_structure(item):
-    --> 204             raise Exception("this item is restricted for append")
-        205         super(StructureStrictList, self).append(item)
-        206         self._get_structure()
+    E:\py_strict_list\py_strict_list\py_strict_list.py in append(self, item)
+        171     def append(self, item):
+        172         if not self.check_item_structure(item):
+    --> 173             raise StructureInvalidError("This item is restricted for append")
+        174         return_value = super(StructureStrictList, self).append(item)
+        175         self._get_structure()
     
 
-    Exception: this item is restricted for append
+    StructureInvalidError: This item is restricted for append
 
 
 
@@ -572,45 +581,45 @@ a = LengthStrictList([1,2,3],[1,2])
 
     ---------------------------------------------------------------------------
 
-    Exception                                 Traceback (most recent call last)
+    StructureInvalidError                     Traceback (most recent call last)
 
-    <ipython-input-64-2fd35d765fe9> in <module>
+    <ipython-input-31-2fd35d765fe9> in <module>
     ----> 1 a = LengthStrictList([1,2,3],[1,2])
     
 
-    E:\py_strict_list\py_strict_list_ver1.py in __init__(self, *args)
-          8         """
-          9         super(StructureStrictList, self).__init__(args)
-    ---> 10         self._get_structure()  # 構造を取得
-         11 
-         12     def _get_structure(self):
+    E:\py_strict_list\py_strict_list\py_strict_list.py in __init__(self, *args)
+         15         """
+         16         super(StructureStrictList, self).__init__(args)
+    ---> 17         self._get_structure()  # 構造を取得
+         18 
+         19     def _get_structure(self):
     
 
-    <ipython-input-63-fcedf1fd2ad8> in _get_structure(self)
-          4         構造を取得するためのメソッド．基本的に自身が変更されたときに呼ぶ
-          5         """
-    ----> 6         self._length_structure = self._get_length_structure(self)
-          7 
-          8     def check_same_structure_with(self, list_like, include_outer_length=True):
+    E:\py_strict_list\py_strict_list\py_strict_list.py in _get_structure(self)
+        256         構造を取得するためのメソッド．基本的に自身が変更されたときに呼ぶ
+        257         """
+    --> 258         self._length_structure = self._get_length_structure(self)
+        259 
+        260     def check_same_structure_with(self, list_like, include_outer_length=False):
     
 
-    E:\py_strict_list\py_strict_list_ver1.py in _get_length_structure(list_like)
-         73                     raise Exception("list like object have to have same length recursive")
-         74 
-    ---> 75         item_have_same_length(list_like)  # 長さが違う場合エラーがでる．
-         76 
-         77         def length_dicision(item, structure_dict):
+    E:\py_strict_list\py_strict_list\py_strict_list.py in _get_length_structure(list_like)
+         80 
+         81         if isinstance(list_like, list):
+    ---> 82             item_have_same_length(list_like)  # 長さが違う場合エラーがでる．
+         83 
+         84         def length_dicision(item, structure_dict):
     
 
-    E:\py_strict_list\py_strict_list_ver1.py in item_have_same_length(item)
-         71                         item_have_same_length(item_child)
-         72                 if len(length_list)!=0 and len(set(length_list))!=1:
-    ---> 73                     raise Exception("list like object have to have same length recursive")
-         74 
-         75         item_have_same_length(list_like)  # 長さが違う場合エラーがでる．
+    E:\py_strict_list\py_strict_list\py_strict_list.py in item_have_same_length(item)
+         75                     is_list_list.append(False)
+         76             if len(length_list)!=0 and len(set(length_list))!=1:
+    ---> 77                 raise StructureInvalidError("list like object have to have same length recursively")
+         78             if not (all(is_list_list) or not any(is_list_list)):  #（すべてリストかすべてリストでないとき）以外
+         79                 raise StructureInvalidError("list like object has save dimension as tree")
     
 
-    Exception: list like object have to have same length recursive
+    StructureInvalidError: list like object have to have same length recursively
 
 
 
@@ -621,53 +630,53 @@ a = LengthStrictList([[1,2,3],[1,2]])
 
     ---------------------------------------------------------------------------
 
-    Exception                                 Traceback (most recent call last)
+    StructureInvalidError                     Traceback (most recent call last)
 
-    <ipython-input-65-d07a1ab9ed5c> in <module>
+    <ipython-input-32-d07a1ab9ed5c> in <module>
     ----> 1 a = LengthStrictList([[1,2,3],[1,2]])
     
 
-    E:\py_strict_list\py_strict_list_ver1.py in __init__(self, *args)
-          8         """
-          9         super(StructureStrictList, self).__init__(args)
-    ---> 10         self._get_structure()  # 構造を取得
-         11 
-         12     def _get_structure(self):
+    E:\py_strict_list\py_strict_list\py_strict_list.py in __init__(self, *args)
+         15         """
+         16         super(StructureStrictList, self).__init__(args)
+    ---> 17         self._get_structure()  # 構造を取得
+         18 
+         19     def _get_structure(self):
     
 
-    <ipython-input-63-fcedf1fd2ad8> in _get_structure(self)
-          4         構造を取得するためのメソッド．基本的に自身が変更されたときに呼ぶ
-          5         """
-    ----> 6         self._length_structure = self._get_length_structure(self)
-          7 
-          8     def check_same_structure_with(self, list_like, include_outer_length=True):
+    E:\py_strict_list\py_strict_list\py_strict_list.py in _get_structure(self)
+        256         構造を取得するためのメソッド．基本的に自身が変更されたときに呼ぶ
+        257         """
+    --> 258         self._length_structure = self._get_length_structure(self)
+        259 
+        260     def check_same_structure_with(self, list_like, include_outer_length=False):
     
 
-    E:\py_strict_list\py_strict_list_ver1.py in _get_length_structure(list_like)
-         73                     raise Exception("list like object have to have same length recursive")
-         74 
-    ---> 75         item_have_same_length(list_like)  # 長さが違う場合エラーがでる．
-         76 
-         77         def length_dicision(item, structure_dict):
+    E:\py_strict_list\py_strict_list\py_strict_list.py in _get_length_structure(list_like)
+         80 
+         81         if isinstance(list_like, list):
+    ---> 82             item_have_same_length(list_like)  # 長さが違う場合エラーがでる．
+         83 
+         84         def length_dicision(item, structure_dict):
     
 
-    E:\py_strict_list\py_strict_list_ver1.py in item_have_same_length(item)
-         69                     if isinstance(item_child, list):
-         70                         length_list.append(len(item_child))
-    ---> 71                         item_have_same_length(item_child)
-         72                 if len(length_list)!=0 and len(set(length_list))!=1:
-         73                     raise Exception("list like object have to have same length recursive")
+    E:\py_strict_list\py_strict_list\py_strict_list.py in item_have_same_length(item)
+         70                 if isinstance(item_child, list):
+         71                     length_list.append(len(item_child))
+    ---> 72                     item_have_same_length(item_child)
+         73                     is_list_list.append(True)
+         74                 else:
     
 
-    E:\py_strict_list\py_strict_list_ver1.py in item_have_same_length(item)
-         71                         item_have_same_length(item_child)
-         72                 if len(length_list)!=0 and len(set(length_list))!=1:
-    ---> 73                     raise Exception("list like object have to have same length recursive")
-         74 
-         75         item_have_same_length(list_like)  # 長さが違う場合エラーがでる．
+    E:\py_strict_list\py_strict_list\py_strict_list.py in item_have_same_length(item)
+         75                     is_list_list.append(False)
+         76             if len(length_list)!=0 and len(set(length_list))!=1:
+    ---> 77                 raise StructureInvalidError("list like object have to have same length recursively")
+         78             if not (all(is_list_list) or not any(is_list_list)):  #（すべてリストかすべてリストでないとき）以外
+         79                 raise StructureInvalidError("list like object has save dimension as tree")
     
 
-    Exception: list like object have to have same length recursive
+    StructureInvalidError: list like object have to have same length recursively
 
 
 
@@ -680,5 +689,3 @@ a
 
 
     [[2, 3], [1, 2]]
-
-
