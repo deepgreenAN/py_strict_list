@@ -62,15 +62,21 @@ class StructureStrictList(list):
         """
         長さ構造を取得．取得する前に長さが再帰的に等しいかチェックしている．
         """
-        # 長さが全て等しいかチェック
+        # それぞれのリストの長さが等しいかつリストとそれ以外が混在しない
         def item_have_same_length(item):
             length_list = []
+            is_list_list = []
             for item_child in item:
                 if isinstance(item_child, list):
                     length_list.append(len(item_child))
                     item_have_same_length(item_child)
+                    is_list_list.append(True)
+                else:
+                    is_list_list.append(False)
             if len(length_list)!=0 and len(set(length_list))!=1:
                 raise StructureInvalidError("list like object have to have same length recursively")
+            if not (all(is_list_list) or not any(is_list_list)):  #（すべてリストかすべてリストでないとき）以外
+                raise StructureInvalidError("list like object has save dimension as tree")
         
         if isinstance(list_like, list):
             item_have_same_length(list_like)  # 長さが違う場合エラーがでる．
@@ -86,37 +92,6 @@ class StructureStrictList(list):
         all_structure_dict = length_dicision(list_like, {})
         return all_structure_dict
         
-    @staticmethod
-    def _check_same_type_structure(structure1, structure2):
-        def same_structure_dicision(item1, item2):
-            if isinstance(item1, list) and isinstance(item2, list):  #どちらもリスト
-                return same_structure_dicision(item1[0], item2[0])
-            elif (not isinstance(item1, list)) and (not isinstance(item2, list)):  # どちらもリストでない
-                return isinstance(item1,type(item2))  # 型が同一か判定
-            else:  # どちらかがリストでない
-                return False
-        return same_structure_dicision(structure1, structure2)
-    
-    @staticmethod
-    def _check_same_length_structure(structure1, structure2):
-        def same_structure_dicision(dict1, dict2):
-            if (dict1 is not None) and (dict2 is not None):  # どちらもNoneでなかった場合     
-                one_key1 = list(dict1.keys())[0]
-                value1 = dict1[one_key1]
-
-                one_key2 = list(dict2.keys())[0]
-                value2 = dict2[one_key2]
-
-                #キーが一致しない場合Falseを返す
-                if one_key1 != one_key2:
-                    return False
-                return same_structure_dicision(value1, value2)
-            elif (dict1 is None) and (dict2 is None):  # どちらもNone
-                return True  # いままでFalseでなかったのでTrue
-            else:  # どちらかのバリューがNone
-                return False  # 構造が異なるため
-        return same_structure_dicision(structure1, structure2)
-    
     def check_same_structure_with(self, list_like, include_outer_length=False):
         """
         list_like: list like object
@@ -129,19 +104,15 @@ class StructureStrictList(list):
             list_like_length_structure = self._get_length_structure(list_like)
         except:  #構造の取得に失敗した場合
             return False
-        is_same_type_structure = self._check_same_type_structure(self._type_structure,
-                                                                 list_like_type_structure
-                                                                )
+        is_same_type_structure = self._type_structure == list_like_type_structure
         
         if include_outer_length: # 一番外側の比較も行う
-            is_same_length_structure = self._check_same_length_structure(self._length_structure,
-                                                                         list_like_length_structure
-                                                                        ) 
+            is_same_length_structure = self._length_structure == list_like_length_structure
 
         else:  # 一番外側の比較は行わない
-            is_same_length_structure = self._check_same_length_structure(self._length_structure[list(self._length_structure.keys())[0]],
-                                                                         list_like_length_structure[list(list_like_length_structure.keys())[0]]
-                                                                        )
+            list_like_item_length_structure = list_like_length_structure[list(list_like_length_structure.keys())[0]]
+            self_item_length_structure = self._length_structure[list(self._length_structure.keys())[0]]
+            is_same_length_structure = self_item_length_structure == list_like_item_length_structure
 
         return is_same_type_structure and is_same_length_structure
         
@@ -155,18 +126,16 @@ class StructureStrictList(list):
             item_length_structure = self._get_length_structure(item)
         except:  #構造の取得に失敗した場合
             return False
-        # itemがリストの場合
-        if isinstance(item, list):
-            is_same_type_structure = self._check_same_type_structure(self._type_structure[0],
-                                                                     item_type_structure)
-            is_same_length_structure = self._check_same_length_structure(self._length_structure[list(self._length_structure.keys())[0]],
-                                                                         item_length_structure)
-        else:
-            if not isinstance(self._type_structure[0], list):
+        if isinstance(item, list):# itemがリストの場合
+            is_same_type_structure = self._type_structure[0] == item_type_structure
+            is_same_length_structure = self._length_structure[list(self._length_structure.keys())[0]] == item_length_structure
+        else:  # itemがリストじゃない場合
+            if not isinstance(self._type_structure[0], list):  # 自身のtype_structureのitemもリストでない場合
                 is_same_type_structure = isinstance(item, self._type_structure[0])
+                is_same_length_structure = True
             else:
                 is_same_type_structure = False
-            is_same_length_structure = True
+                is_same_length_structure = False
         
         return is_same_type_structure and is_same_length_structure
     
@@ -201,31 +170,34 @@ class StructureStrictList(list):
     
     def append(self, item):
         if not self.check_item_structure(item):
-            raise Exception("This item is restricted for append")
-        super(StructureStrictList, self).append(item)
+            raise StructureInvalidError("This item is restricted for append")
+        return_value = super(StructureStrictList, self).append(item)
         self._get_structure()
+        return return_value
         
     def extend(self, iterable):
         if not self.check_same_structure_with(list(iterable), include_outer_length=False):  # 外側の長さの比較は行わない
-            raise Exception("This iterable is restricted for extend")
-        super(StructureStrictList, self).extend(iterable)
+            raise StructureInvalidError("This iterable is restricted for extend")
+        return_value = super(StructureStrictList, self).extend(iterable)
         self._get_structure()
+        return return_value
         
     def insert(self, i, item):
         if not self.check_item_structure(item):
-            raise Exception("This item is restricted for insert")
-        super(StructureStrictList, self).insert(i, item)
+            raise StructureInvalidError("This item is restricted for insert")
+        return_value = super(StructureStrictList, self).insert(i, item)
         self._get_structure()
+        return return_value
         
     def remove(self, *args, **kwargs):
-        super(StructureStrictList, self).remove(*args, **kwargs)
+        return_value = super(StructureStrictList, self).remove(*args, **kwargs)
         self._get_structure()
+        return return_value
         
     def pop(self, *args, **kwargs):
-        super(StructureStrictList, self).pop(*args, **kwargs)
-        self._get_structure() 
-
-
+        return_value = super(StructureStrictList, self).pop(*args, **kwargs)
+        self._get_structure()
+        return return_value
 class TypeStrictList(StructureStrictList):
     def _get_structure(self):
         """
@@ -233,18 +205,19 @@ class TypeStrictList(StructureStrictList):
         """
         self._type_structure = self._get_type_structure(self)
     
-    def check_same_structure_with(self, list_like, include_outer_length=True):
+    def check_same_structure_with(self, list_like, include_outer_length=False):
         """
         list_like: list like object
             構造を自身と比較したいリスト
         include_outer_length int
-            最も外側の長さを比較する構造に含めるかどうか．今回は意味ない
+            最も外側の長さを比較する構造に含めるかどうか
         """
         try:
             list_like_type_structure = self._get_type_structure(list_like)
         except:  #構造の取得に失敗した場合
             return False
-        is_same_type_structure = self._check_same_type_structure(self._type_structure, list_like_type_structure)
+        is_same_type_structure = self._type_structure == list_like_type_structure
+        
         return is_same_type_structure
     
     def check_item_structure(self, item):
@@ -256,13 +229,11 @@ class TypeStrictList(StructureStrictList):
             item_type_structure = self._get_type_structure(item)
         except:  #構造の取得に失敗した場合
             return False
-        
-        # itemがリストの場合
-        if isinstance(item, list):
-            is_same_type_structure = self._check_same_type_structure(self._type_structure[0], item_type_structure)
-        else:
-            if not isinstance(self._type_structure[0], list):
-                is_same_type_structure = isinstance(item,self._type_structure[0])
+        if isinstance(item, list):# itemがリストの場合
+            is_same_type_structure = self._type_structure[0] == item_type_structure
+        else:  # itemがリストじゃない場合
+            if not isinstance(self._type_structure[0], list):  # 自身のtype_structureのitemもリストでない場合
+                is_same_type_structure = isinstance(item, self._type_structure[0])
             else:
                 is_same_type_structure = False
         
@@ -286,26 +257,25 @@ class LengthStrictList(StructureStrictList):
         """
         self._length_structure = self._get_length_structure(self)
        
-    def check_same_structure_with(self, list_like, include_outer_length=True):
+    def check_same_structure_with(self, list_like, include_outer_length=False):
         """
         list_like: list like object
             構造を自身と比較したいリスト
         include_outer_length int
-            最も外側の長さを比較する構造に含めるかどうか．
+            最も外側の長さを比較する構造に含めるかどうか
         """
         try:
             list_like_length_structure = self._get_length_structure(list_like)
         except:  #構造の取得に失敗した場合
             return False
+        
         if include_outer_length: # 一番外側の比較も行う
-            is_same_length_structure = self._check_same_length_structure(self._length_structure,
-                                                                         list_like_length_structure
-                                                                        ) 
+            is_same_length_structure = self._length_structure == list_like_length_structure
 
         else:  # 一番外側の比較は行わない
-            is_same_length_structure = self._check_same_length_structure(self._length_structure[list(self._length_structure.keys())[0]],
-                                                                         list_like_length_structure[list(list_like_length_structure.keys())[0]]
-                                                                        )
+            list_like_item_length_structure = list_like_length_structure[list(list_like_length_structure.keys())[0]]
+            self_item_length_structure = self._length_structure[list(self._length_structure.keys())[0]]
+            is_same_length_structure = self_item_length_structure == list_like_item_length_structure
 
         return is_same_length_structure
     
@@ -318,12 +288,10 @@ class LengthStrictList(StructureStrictList):
             item_length_structure = self._get_length_structure(item)
         except:  #構造の取得に失敗した場合
             return False
-        # itemがリストの場合
-        if isinstance(item, list):
-            is_same_length_structure = self._check_same_length_structure(self._length_structure[list(self._length_structure.keys())[0]],
-                                                                         item_length_structure)
-        else:
-            is_same_length_structure = True
+        if isinstance(item, list):# itemがリストの場合
+            is_same_length_structure = self._length_structure[list(self._length_structure.keys())[0]] == item_length_structure
+        else:  # itemがリストじゃない場合
+            is_same_length_structure = self._length_structure[list(self._length_structure.keys())[0]] is None  # 自身ののitemもリストでない場合
         
         return is_same_length_structure
     
