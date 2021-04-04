@@ -245,7 +245,7 @@ class TypeStrictList(StructureStrictList):
         """
         try:
             list_like_type_structure = self._get_type_structure(list_like)
-        except:  #構造の取得に失敗した場合
+        except StructureInvalidError:  #構造の取得に失敗した場合
             return False
         is_same_type_structure = self._type_structure == list_like_type_structure
         
@@ -258,7 +258,7 @@ class TypeStrictList(StructureStrictList):
         """
         try:
             item_type_structure = self._get_type_structure(item)
-        except:  #構造の取得に失敗した場合
+        except StructureInvalidError:  #構造の取得に失敗した場合
             return False
         if isinstance(item, list):# itemがリストの場合
             is_same_type_structure = self._type_structure[0] == item_type_structure
@@ -297,7 +297,7 @@ class LengthStrictList(StructureStrictList):
         """
         try:
             list_like_length_structure = self._get_length_structure(list_like)
-        except:  #構造の取得に失敗した場合
+        except StructureInvalidError:  #構造の取得に失敗した場合
             return False
         
         if include_outer_length: # 一番外側の比較も行う
@@ -317,7 +317,7 @@ class LengthStrictList(StructureStrictList):
         """
         try:
             item_length_structure = self._get_length_structure(item)
-        except:  #構造の取得に失敗した場合
+        except StructureInvalidError:  #構造の取得に失敗した場合
             return False
         if isinstance(item, list):# itemがリストの場合
             is_same_length_structure = self._length_structure[list(self._length_structure.keys())[0]] == item_length_structure
