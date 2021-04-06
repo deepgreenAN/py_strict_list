@@ -1,49 +1,3 @@
-from .hook_func_ver1 import HookFunc
-
-
-class PropertyList(list):
-    """
-    基底となるリスト
-    """
-    def __init__(self, *args):
-        super(PropertyList, self).__init__(args)
-        self._hook_func = HookFunc()  # ホック関数
-        
-    @property
-    def hook_func(self):
-        return self._hook_func
-
-    @hook_func.setter
-    def hook_func(self, another_hook_func):
-        if isinstance(another_hook_func, HookFunc):
-            self._hook_func = another_hook_func
-    
-    def append(self, *args, **kwargs):
-        return_value = super(PropertyList, self).append(*args, **kwargs)
-        self._hook_func()  # ホック関数の実行
-        return return_value
-    
-    def extend(self, *args, **kwargs):
-        return_value = super(PropertyList, self).extend(*args, **kwargs)
-        self._hook_func()  # ホック関数の実行
-        return return_value
-    
-    def insert(self, *args, **kwargs):
-        return_value = super(PropertyList, self).insert(*args, **kwargs)
-        self._hook_func()  # ホック関数の実行
-        return return_value
-    
-    def remove(self, *args, **kwargs):
-        return_value = super(PropertyList, self).remove(*args, **kwargs)
-        self._hook_func()  # ホック関数の実行
-        return return_value
-    
-    def pop(self, *args, **kwargs):
-        return_value = super(PropertyList, self).pop(*args, **kwargs)
-        self._hook_func()  # ホック関数の実行
-        return return_value      
-
-
 class StructureInvalidError(Exception):
     def __init__(self, strings):
         self.strings = strings
@@ -51,7 +5,7 @@ class StructureInvalidError(Exception):
         return self.strings
 
 
-class StructureStrictList(PropertyList):
+class StructureStrictList(list):
     """
     型と長さが再帰的に厳密なリスト
     """
@@ -59,9 +13,8 @@ class StructureStrictList(PropertyList):
         """
         コンストラクタの引数は普通のリストと変わらない
         """
-        super(StructureStrictList, self).__init__(*args)  # PropertyListには展開して渡す
+        super(StructureStrictList, self).__init__(args)
         self._get_structure()  # 構造を取得
-        self.hook_func.add(self._get_structure)  # ホック関数に追加
         
     def _get_structure(self):
         """
@@ -202,7 +155,7 @@ class StructureStrictList(PropertyList):
         """
         # 空の自身を作成
         instance = cls(None)
-        super(PropertyList, instance).remove(None)  # 基底のスーパークラスのメソッド呼び出し
+        super(StructureStrictList, instance).remove(None)  # 親のスーパークラスのメソッド呼び出し
         instance._type_structure = _type_structure
         instance._length_structure = _length_structure
         return instance
@@ -219,21 +172,32 @@ class StructureStrictList(PropertyList):
         if not self.check_item_structure(item):
             raise StructureInvalidError("This item is restricted for append")
         return_value = super(StructureStrictList, self).append(item)
+        self._get_structure()
         return return_value
         
     def extend(self, iterable):
         if not self.check_same_structure_with(list(iterable), include_outer_length=False):  # 外側の長さの比較は行わない
             raise StructureInvalidError("This iterable is restricted for extend")
         return_value = super(StructureStrictList, self).extend(iterable)
+        self._get_structure()
         return return_value
         
     def insert(self, i, item):
         if not self.check_item_structure(item):
             raise StructureInvalidError("This item is restricted for insert")
         return_value = super(StructureStrictList, self).insert(i, item)
+        self._get_structure()
         return return_value
-
-
+        
+    def remove(self, *args, **kwargs):
+        return_value = super(StructureStrictList, self).remove(*args, **kwargs)
+        self._get_structure()
+        return return_value
+        
+    def pop(self, *args, **kwargs):
+        return_value = super(StructureStrictList, self).pop(*args, **kwargs)
+        self._get_structure()
+        return return_value
 class TypeStrictList(StructureStrictList):
     def _get_structure(self):
         """
@@ -250,7 +214,7 @@ class TypeStrictList(StructureStrictList):
         """
         try:
             list_like_type_structure = self._get_type_structure(list_like)
-        except StructureInvalidError:  #構造の取得に失敗した場合
+        except:  #構造の取得に失敗した場合
             return False
         is_same_type_structure = self._type_structure == list_like_type_structure
         
@@ -263,7 +227,7 @@ class TypeStrictList(StructureStrictList):
         """
         try:
             item_type_structure = self._get_type_structure(item)
-        except StructureInvalidError:  #構造の取得に失敗した場合
+        except:  #構造の取得に失敗した場合
             return False
         if isinstance(item, list):# itemがリストの場合
             is_same_type_structure = self._type_structure[0] == item_type_structure
@@ -281,7 +245,7 @@ class TypeStrictList(StructureStrictList):
         型構造構造から，空のStructureStrictListを作成
         """
         instance = cls(None)
-        super(PropertyList, instance).remove(None)  # 基底のスーパークラスのメソッド呼び出し
+        super(StructureStrictList, instance).remove(None)  # 親のスーパークラスのメソッド呼び出し
         instance._type_structure = _type_structure
         return instance
 
@@ -302,7 +266,7 @@ class LengthStrictList(StructureStrictList):
         """
         try:
             list_like_length_structure = self._get_length_structure(list_like)
-        except StructureInvalidError:  #構造の取得に失敗した場合
+        except:  #構造の取得に失敗した場合
             return False
         
         if include_outer_length: # 一番外側の比較も行う
@@ -322,7 +286,7 @@ class LengthStrictList(StructureStrictList):
         """
         try:
             item_length_structure = self._get_length_structure(item)
-        except StructureInvalidError:  #構造の取得に失敗した場合
+        except:  #構造の取得に失敗した場合
             return False
         if isinstance(item, list):# itemがリストの場合
             is_same_length_structure = self._length_structure[list(self._length_structure.keys())[0]] == item_length_structure
@@ -334,35 +298,37 @@ class LengthStrictList(StructureStrictList):
     @classmethod
     def from_length_structure(cls, _length_structure):
         instance = cls(None)
-        super(PropertyList, instance).remove(None)  # 基底のスーパークラスのメソッド呼び出し
+        super(StructureStrictList, instance).remove(None)  # 親のスーパークラスのメソッド呼び出し
         instance._length_structure = _length_structure
         return instance
 
 
-def strict_list_property(private_name, include_outer_length=False):
-    """
-    StructureStrictListをpropertyに登録する関数
-    
-    private_name: str
-        propertyで隠す変数
-    include_outer_lengh: bool
-        もっとも外側の長さを比較に含めるかどうか
-    
-    """
-    def getter(instance):
-        return instance.__dict__[private_name]
+def ssl(*args):
+    return StructureStrictList(*args)
 
-    def setter(instance, list_like):
-        if not instance.__dict__[private_name].check_same_structure_with(list_like,
-                                                                         include_outer_length=include_outer_length
-                                                                         ):
-            raise StructureInvalidError("This list-like is invalid")
-        previous_hook_func = instance.__dict__[private_name].hook_func
-        instance.__dict__[private_name] = type(instance.__dict__[private_name]).from_list(list_like)
-        previous_hook_func()  # hook_funcの実行
-        instance.__dict__[private_name].hook_func = previous_hook_func
-        
-    return property(getter, setter)
+def tsl(*args):
+    return TypeStrictList(*args)
+
+def lsl(*args):
+    return LengthStrictList(*args)
+
+def ssl_from_list(_list):
+    return StructureStrictList.from_list(_list)
+
+def tsl_from_list(_list):
+    return TypeStrictList.from_list(_list)
+
+def lsl_from_list(_list):
+    return LengthStrictList.from_list(_list)
+
+def ssl_from_structures(type_structure, length_structure):
+    return StructureStrictList.from_structures(type_structure, length_structure)
+
+def tsl_from_structure(type_structure):
+    return TypeStrictList.from_type_structure(type_structure)
+
+def lsl_from_structure(length_structure):
+    return LengthStrictList.from_length_structure(length_structure)
 
 if __name__ == "__main__":
     pass
