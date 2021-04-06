@@ -3,6 +3,7 @@
 プロパティとしてリストを採用するのを想定し，変更時に自動で型チェックを行うリスト．
 セッターなどで利用するときも簡単に型チェックできる．基本的に構造はコンストラクタで確定する(構造から空リストを作ることもできる．)．
 あくまでも型チェック用のリストであり，速度の向上は無い．
+より複雑なバリデーションを使いたいなら、[Cerberus](https://github.com/pyeve/cerberus)等のバリデーションツールを利用するべき
 
 ## test
 ```
@@ -21,7 +22,7 @@ python setup.py install
 
 ## 使い方
 ```python
-from py_strict_list import StructureStrictList, TypeStrictList, LengthStrictList
+from py_strict_list import StructureStrictList, TypeStrictList, LengthStrictList, strict_list_property
 ```
 
 ## 型・長さ構造が厳密なリスト
@@ -364,7 +365,7 @@ def some_list(self, __some_list):
     self._some_list = StructureStrictList.from_list(__some_list)
 ```
 
-とすれば，型を比較しリストを更新できる．
+とすれば，型を比較しリストを更新できる．後述する`py_strict_list.strict_list_property`を利用してもよい．
 
 ## 型が厳密なリスト 
 
@@ -744,7 +745,21 @@ b
 
 
 
-
     15
 
+ホック関数を追加した場合，セッターの定義は以下のようになる．
 
+```python
+@some_list.setter
+def some_list(self, __some_list):
+    if not self._some_list.check_same_structure_with(__some_list, include_outer_length=False):
+        raise Exception("This some_list is invalid")
+    pre_hook_func = self._some_list.hook_func
+    self._some_list = StructureStrictList.from_list(__some_list)
+    pre_hook_func()  # ホック関数の実行
+    self._some_list.hook_func = pre_hook_func
+```
+これでは面倒なので、同じことのできる`py_strict_list.strict_list_property`が利用できる．property関数と同様に、クラスの直下に以下のように記述する．
+```python
+some_list = strict_list_property("_some_list", include_outer_length=False)
+```
