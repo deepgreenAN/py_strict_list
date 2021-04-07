@@ -22,7 +22,7 @@ python setup.py install
 
 ## 使い方
 ```python
-from py_strict_list import StructureStrictList, TypeStrictList, LengthStrictList, strict_list_property
+from py_strict_list import StructureStrictList, TypeStrictList, LengthStrictList, strict_list_property, StrictListValidator
 ```
 
 ## 型・長さ構造が厳密なリスト
