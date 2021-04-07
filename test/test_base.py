@@ -2,7 +2,7 @@ import unittest
 from functools import reduce
 
 from py_strict_list import StructureStrictList, TypeStrictList, LengthStrictList
-from py_strict_list import StructureInvalidError, strict_list_property, StructureListValidator
+from py_strict_list import StructureInvalidError, strict_list_property, StrictListValidator
 
 
 class TestSSL(unittest.TestCase):
@@ -325,7 +325,7 @@ class B:
 
 class C_false:
     SL = StructureStrictList
-    inner_list = StructureListValidator(include_outer_length=False)
+    inner_list = StrictListValidator(include_outer_length=False)
     def __init__(self, list_like):
         self._inner_list = C_false.SL.from_list(list_like)
         self.inner_list = self._inner_list
@@ -338,7 +338,7 @@ class C_false:
 
 class C_true:
     SL = StructureStrictList
-    inner_list = StructureListValidator(include_outer_length=True)
+    inner_list = StrictListValidator(include_outer_length=True)
     def __init__(self, list_like):
         self._inner_list = C_true.SL.from_list(list_like)
         self.inner_list = self._inner_list

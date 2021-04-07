@@ -696,7 +696,7 @@ a
 
 ## その他便利機能
 
-### 要素の変更時に関数をホックできる． 
+### 要素の変更時に関数をホックできる
 
 リストをプロパティとして利用する場合に，要素が変更したときに特定のメソッドを呼びたいことがある(そのプロパティの要素によって他のプロパティの値が変わる場合など)．
 各リストの`hook_func`属性の`add`メソッドで関数を登録することによって，そのリストが変更されたときにその関数を呼ぶことができる．
@@ -763,3 +763,32 @@ def some_list(self, __some_list):
 ```python
 some_list = strict_list_property("_some_list", include_outer_length=False)
 ```
+使用例を以下に示す．
+```python
+class SumList:
+    def __init__(self, list_like):
+        self._inner_list = StructureStrictList.from_list(list_like)
+        self.make_sum()  # フック関数の実行
+        self._inner_list.hook_func.add(self.make_sum)
+
+    def make_sum(self):
+        self.sum = reduce(lambda x,y:x+y, flatten(self._inner_list))
+
+    inner_list = strict_list_property("_inner_list", include_outer_length=False)
+```
+以上はproperty関数のように利用するが，同等の機能を持つディスクリプタである
+`py_strict_list.StrictListValidator` も利用できる．
+使用例を以下に示す．
+```python
+class SumList:
+    inner_list = StrictListValidator(include_outer_length=False)
+    def __init__(self, list_like):
+        self._inner_list = StructureStrictList.from_list(list_like)
+        self.inner_list = self._inner_list
+        self.make_sum()
+        self._inner_list.hook_func.add(self.make_sum)
+        
+    def make_sum(self):
+        self.sum = reduce(lambda x,y:x+y, flatten(self._inner_list))
+```
+このディスクリプタは最初の代入時にprivateなアトリビュートによる代入が必要となる．

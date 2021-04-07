@@ -365,7 +365,7 @@ def strict_list_property(private_name, include_outer_length=False):
     return property(getter, setter)
 
 
-class StructureListValidator():
+class StrictListValidator():
     """
     StructureListのValidator(ディスクリプタ)
     セットされるときに構造チェックを行う
