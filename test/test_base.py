@@ -1,7 +1,8 @@
 import unittest
+from functools import reduce
 
 from py_strict_list import StructureStrictList, TypeStrictList, LengthStrictList
-from py_strict_list import StructureInvalidError, strict_list_property
+from py_strict_list import StructureInvalidError, strict_list_property, StructureListValidator
 
 
 class TestSSL(unittest.TestCase):
@@ -258,6 +259,16 @@ class TestLSL(unittest.TestCase):
         self.assertTrue(x.check_same_structure_with([[1,2]], include_outer_length=True))
 
 
+def flatten(_list):
+    def flatten_gen(_list):
+        for item in _list:
+            if isinstance(item, list):
+                yield from flatten_gen(item)
+            else:
+                yield item
+    return list(flatten_gen(_list))
+
+
 class A_false:
     SL = StructureStrictList
     def __init__(self, list_like):
@@ -266,7 +277,7 @@ class A_false:
         self._inner_list.hook_func.add(self.make_sum)
 
     def make_sum(self):
-        self.sum = sum(self._inner_list)
+        self.sum = reduce(lambda x,y:x+y, flatten(self._inner_list))
 
     inner_list = strict_list_property("_inner_list", include_outer_length=False)
 
@@ -279,7 +290,7 @@ class A_true:
         self._inner_list.hook_func.add(self.make_sum)
 
     def make_sum(self):
-        self.sum = sum(self._inner_list)
+        self.sum = reduce(lambda x,y:x+y, flatten(self._inner_list))
 
     inner_list = strict_list_property("_inner_list", include_outer_length=True)
 
@@ -293,7 +304,7 @@ class B:
         self._inner_list.hook_func.add(self.make_sum)
 
     def make_sum(self):
-        self.sum = sum(self._inner_list)
+        self.sum = reduce(lambda x,y:x+y, flatten(self._inner_list))
 
     @property
     def inner_list(self):
@@ -312,6 +323,32 @@ class B:
         self._inner_list.hook_func = pre_hook_fnnc
 
 
+class C_false:
+    SL = StructureStrictList
+    inner_list = StructureListValidator(include_outer_length=False)
+    def __init__(self, list_like):
+        self._inner_list = C_false.SL.from_list(list_like)
+        self.inner_list = self._inner_list
+        self.make_sum()
+        self._inner_list.hook_func.add(self.make_sum)
+        
+    def make_sum(self):
+        self.sum = reduce(lambda x,y:x+y, flatten(self._inner_list))
+
+
+class C_true:
+    SL = StructureStrictList
+    inner_list = StructureListValidator(include_outer_length=True)
+    def __init__(self, list_like):
+        self._inner_list = C_true.SL.from_list(list_like)
+        self.inner_list = self._inner_list
+        self.make_sum()
+        self._inner_list.hook_func.add(self.make_sum)
+        
+    def make_sum(self):
+        self.sum = reduce(lambda x,y:x+y, flatten(self._inner_list))
+
+
 class TestProperty(unittest.TestCase):
     def test_ssl_property(self):   
         # A
@@ -319,7 +356,6 @@ class TestProperty(unittest.TestCase):
         a = A_false([1,2,3,4])
         with self.assertRaises(StructureInvalidError):
             a.inner_list.append([2])
-            
         with self.assertRaises(StructureInvalidError):
             a.inner_list = [[5,6],[7,8]]
         
@@ -375,6 +411,38 @@ class TestProperty(unittest.TestCase):
 
         b.inner_list = [5,6,7,8]
         self.assertEqual(b.sum, 26)
+        
+    def test_ssl_discriptor(self):
+        # C
+        # include_outer_length = False
+        c = C_false([1,2,3,4])
+        with self.assertRaises(StructureInvalidError):
+            c.inner_list.append([2])
+            
+        with self.assertRaises(StructureInvalidError):
+            c.inner_list = [[5,6],[7,8]]
+        
+        c.inner_list.append(5)
+        self.assertEqual(c.sum, 15)
+        c.inner_list = [3,4]
+        self.assertEqual(c.sum, 7)
+        c.inner_list = [5,6,7,8]
+        self.assertEqual(c.sum, 26)
+        
+        # include_outer_length = True
+        c = C_true([1,2,3,4])
+        
+        with self.assertRaises(StructureInvalidError):
+            c.inner_list.append([2])
+            
+        with self.assertRaises(StructureInvalidError):
+            c.inner_list = [[5,6],[7,8]]
+            
+        with self.assertRaises(StructureInvalidError):
+            c.inner_list = [3,4]
+
+        c.inner_list = [5,6,7,8]
+        self.assertEqual(c.sum, 26)
 
 
 

@@ -759,7 +759,7 @@ def some_list(self, __some_list):
     pre_hook_func()  # ホック関数の実行
     self._some_list.hook_func = pre_hook_func
 ```
-これでは面倒なので、同じことのできる`py_strict_list.strict_list_property`が利用できる．property関数と同様に、クラスの直下に以下のように記述する．
+これでは面倒なので、同じことのできる`py_strict_list.strict_list_property`が利用できる．property関数と同様に、クラスの定義で直下に以下のように記述する．
 ```python
 some_list = strict_list_property("_some_list", include_outer_length=False)
 ```

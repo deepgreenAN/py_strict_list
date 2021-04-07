@@ -364,5 +364,47 @@ def strict_list_property(private_name, include_outer_length=False):
         
     return property(getter, setter)
 
+
+class StructureListValidator():
+    """
+    StructureListのValidator(ディスクリプタ)
+    セットされるときに構造チェックを行う
+    """
+    def __init__(self, include_outer_length=False):
+        """
+        include_outer_length: bool
+            最も外側を含めるかどうか
+        """
+        self.include_outer_length = include_outer_length
+        
+    def __set_name__(self, owner, name):
+        self.private_name = '_' + name
+
+    def __get__(self, obj, objtype=None):
+        """
+        privateを参照
+        """
+        if obj is None:  # クラスアトリビュートとして参照された時
+            return self
+        
+        return getattr(obj, self.private_name)
+
+    def __set__(self, obj, list_like):
+        """
+        構造チェック・hook関数の実行と移行
+        """
+        if not getattr(obj, self.private_name).check_same_structure_with(list_like,
+                                                                         include_outer_length=self.include_outer_length
+                                                                        ):
+            raise StructureInvalidError("This list_like is invalid")
+
+        ssl_list_like = type(getattr(obj, self.private_name)).from_list(list_like)
+        pre_hook_func = getattr(obj, self.private_name).hook_func
+        setattr(obj, self.private_name, ssl_list_like)
+        pre_hook_func()  # Hook関数を実行
+        getattr(obj, self.private_name).hook_func = pre_hook_func
+
+
+
 if __name__ == "__main__":
     pass
