@@ -5,19 +5,9 @@
 あくまでも型チェック用のリストであり，速度の向上は無い．
 より複雑なバリデーションを使いたいなら、[Cerberus](https://github.com/pyeve/cerberus)等のバリデーションツールを利用するべき
 
-## test
-```
-python setup.py test
-```
-
 ## installation
 ```
 pip install git+https://github.com/deepgreenAN/py_strict_list
-```
-あるいは
-クローンした後，そのディレクトリで以下を実行する．
-```
-python setup.py install
 ```
 
 ## 使い方
